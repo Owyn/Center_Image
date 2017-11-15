@@ -2,12 +2,12 @@
 // @name          Center Image
 // @namespace     CenterImage
 // @author        Owyn
-// @version       1.9
+// @version       1.91
 // @description   Centers images (directly opened with browser)(firefox-like) with hotkeys (to resize or scroll)
 // @updateURL     https://greasyfork.org/scripts/110-center-image/code/Center%20Image.user.js
 // @downloadURL   https://greasyfork.org/scripts/110-center-image/code/Center%20Image.user.js
 // @homepage      https://greasyfork.org/scripts/110-center-image
-// @run-at        document-start
+// @run-at        document-end
 // @noframes
 // @grant         GM.getValue
 // @grant         GM.setValue
@@ -42,6 +42,8 @@ function makeimage()
 		if(document.head){document.head.innerHTML = "";} // remove FireFox background
 	}
 	document.body.innerHTML = "<style>img { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }</style>"; // center image
+	i.style = ""; // chrome has lots of crap there
+	document.body.style = "";
 	i.style.margin = "auto"; // center image
 	document.body.style.margin = "0px";
 	document.body.appendChild(i);
@@ -168,43 +170,36 @@ function rescale(event)
 
 function autoresize()
 {
-	if(i.naturalWidth) // stupidfox
+	if(!document.head) // old fix for old chrome - let it be
 	{
-		if(!document.head) // old fix for old chrome - let it be
-		{
-			document.lastChild.insertBefore(document.createElement("head"), document.body);
-		}
-		var link = document.createElement('link');
-		link.type = 'image/x-icon';
-		link.rel = 'shortcut icon';
-		link.href = i.src;
-		document.head.appendChild(link); // favicon
-		var title = i.src.substr(i.src.lastIndexOf("/")+1);
-		if(title.indexOf("?") != -1)
-		{
-			title = title.substr(0, title.indexOf("?"));
-		}
-		document.title = title + " (" + i.naturalWidth + "x" + i.naturalHeight + ")"; // title
-		
-		rescaled = true;rescale(0); // to original size in pixels
-		if(cfg_fitWH && i.height > window.innerHeight && i.width > window.innerWidth) // both scrollbars
-		{
-			rescale(0);
-		}
-		else if(cfg_fitB && (i.height > window.innerHeight || i.width > window.innerWidth)) // one scrollbar
-		{
-			rescale(0);
-		}
-		else if(cfg_fitS && i.height <= window.innerHeight && i.width <= window.innerWidth) // no scrollbars
-		{
-			rescale(0);
-		}
-		if(cfg_js){eval(cfg_js);}
+		document.lastChild.insertBefore(document.createElement("head"), document.body);
 	}
-	else
+	var link = document.createElement('link');
+	link.type = 'image/x-icon';
+	link.rel = 'shortcut icon';
+	link.href = i.src;
+	document.head.appendChild(link); // favicon
+	var title = i.src.substr(i.src.lastIndexOf("/")+1);
+	if(title.indexOf("?") != -1)
 	{
-		setTimeout(function() { autoresize(); }, 1);
+		title = title.substr(0, title.indexOf("?"));
 	}
+	document.title = title + " (" + i.naturalWidth + "x" + i.naturalHeight + ")"; // title
+	
+	rescaled = true;rescale(0); // to original size in pixels
+	if(cfg_fitWH && i.height > window.innerHeight && i.width > window.innerWidth) // both scrollbars
+	{
+		rescale(0);
+	}
+	else if(cfg_fitB && (i.height > window.innerHeight || i.width > window.innerWidth)) // one scrollbar
+	{
+		rescale(0);
+	}
+	else if(cfg_fitS && i.height <= window.innerHeight && i.width <= window.innerWidth) // no scrollbars
+	{
+		rescale(0);
+	}
+	if(cfg_js){eval(cfg_js);}
 }
 
 // hotkeys
