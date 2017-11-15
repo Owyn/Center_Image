@@ -1,9 +1,6 @@
-# Center_Image
-browser userscript (extension) which centers images (directly opened with browser)(firefox-like) with hotkeys (to resize or scroll)
-
 <h3>Summary</h3>
 Centers horizontally and vertically any image opened directly in your browser. You can configure background color & which images to fit to window and which to leave in original size when opened.
-<br>* A brother of <a href=https://greasyfork.org/scripts/109-handy-image>Handy Just Image</a> but for all images you open in your browser
+<br>* A brother of <a href=https://github.com/Owyn/HandyImage>Handy Just Image</a> but for all images you open in your browser
 
 <h3>Hotkeys</h3>
 <ul>
