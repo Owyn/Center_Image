@@ -2,11 +2,12 @@
 // @name          Center Image
 // @namespace     CenterImage
 // @author        Owyn
-// @version       1.91
+// @version       1.94
 // @description   Centers images (directly opened with browser)(firefox-like) with hotkeys (to resize or scroll)
-// @updateURL     https://greasyfork.org/scripts/110-center-image/code/Center%20Image.user.js
-// @downloadURL   https://greasyfork.org/scripts/110-center-image/code/Center%20Image.user.js
-// @homepage      https://greasyfork.org/scripts/110-center-image
+// @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
+// @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
+// @supportURL    https://github.com/Owyn/Center_Image/issues
+// @homepage      https://github.com/Owyn/Center_Image
 // @run-at        document-end
 // @noframes
 // @grant         GM.getValue
@@ -14,13 +15,10 @@
 // @grant         GM_registerMenuCommand
 // @match         http://*/*
 // @match         https://*/*
-// @match         file://*/*
+// @match         file:///*/*
 // ==/UserScript==
 
-if (typeof GM_registerMenuCommand !== "undefined")
-{
-	GM_registerMenuCommand("Center Image Configuration", cfg, "n");
-}
+"use strict";
 
 var images = document.images;
 if (!images || images.length !== 1 || images[0].src !== location.href) 
@@ -28,14 +26,18 @@ if (!images || images.length !== 1 || images[0].src !== location.href)
 	return false;
 }
 
+if (typeof GM_registerMenuCommand !== "undefined")
+{
+	GM_registerMenuCommand("Center Image Configuration", cfg, "n");
+}
+
 var rescaled = false;
 var iot = 0, iol = 0;
 var i = images[0];
 
-var FireFox = ((navigator.userAgent.indexOf('Firefox') != -1) ? true : false);
-
 function makeimage()
 {
+	if(typeof cfg_js !== "string") {setTimeout(function() { makeimage(); }, 11); return false;} // lets wait for async
 	if(cfg_bgclr)
 	{
 		document.body.bgColor = cfg_bgclr;
@@ -51,8 +53,21 @@ function makeimage()
 	i.addEventListener("click", rescale, true);
 	window.addEventListener("keydown", onkeydown, true);
 	window.addEventListener("resize", onresize, true);
-	autoresize();
+	onVisibilityChange();
 }
+
+function onVisibilityChange()
+{
+	if (document.visibilityState === 'visible')
+	{
+		if(i)
+		{
+			autoresize();
+			document.removeEventListener('visibilitychange', onVisibilityChange);
+		}
+	}
+}
+document.addEventListener("visibilitychange", onVisibilityChange);
 
 function onresize()
 {
@@ -74,12 +89,12 @@ function changecursor()
 	{
 		if(rescaled)
 		{
-			i.style.cursor = "-moz-zoom-in";
+			i.style.cursor = "zoom-in";
 			i.style.cursor = "-webkit-zoom-in";
 		}
 		else
 		{
-			i.style.cursor = "-moz-zoom-out";
+			i.style.cursor = "zoom-out";
 			i.style.cursor = "-webkit-zoom-out";
 			if((i.naturalHeight / window.devicePixelRatio).toFixed() > window.innerHeight) // image pushing out-of-screen fix
 			{
@@ -91,18 +106,18 @@ function changecursor()
 	{
 		if(rescaled)
 		{
-			i.style.cursor = "-moz-zoom-out";
+			i.style.cursor = "zoom-out";
 			i.style.cursor = "-webkit-zoom-out";
 		}
 		else
 		{
-			i.style.cursor = "-moz-zoom-in";
+			i.style.cursor = "zoom-in";
 			i.style.cursor = "-webkit-zoom-in";
 		}
 	}
 }
 
-function onmousedown(event)
+function onmousedown()
 {
 	if(i.offsetLeft > 0){iol = i.offsetLeft;}
 	if(i.offsetTop > 0){iot = i.offsetTop;}
@@ -113,7 +128,7 @@ function rescale(event)
 	if(rescaled)
 	{
 		rescaled = false;
-		var scale;
+		var scale, ex, ey;
 		if(event)
 		{
 			if (typeof event.y === "undefined") // Firefox
@@ -305,31 +320,30 @@ function onkeydown (b)
 	}
 }
 
-var cfg_bgclr;
-var cfg_fitWH;
-var cfg_fitB;
-var cfg_fitS;
+var cfg_bgclr = "grey";
+var cfg_fitWH = true;
+var cfg_fitB = false;
+var cfg_fitS = true;
 var cfg_js;
 
-async function loadCfg()
+function cfg(){}
+
+if (typeof GM !== "undefined" && typeof GM.getValue !== "undefined")
 {
-	if (typeof GM.getValue !== "undefined")
+	async function loadCfg()
 	{
-		cfg_bgclr = await GM.getValue("bgColor", "grey");
-		cfg_fitWH = await GM.getValue("fitWH", true);
-		cfg_fitB = await GM.getValue("fitB", false);
-		cfg_fitS = await GM.getValue("fitS", true);
-		cfg_js = await GM.getValue("js", "");
+			cfg_bgclr = await GM.getValue("bgColor", "grey");
+			cfg_fitWH = await GM.getValue("fitWH", true);
+			cfg_fitB = await GM.getValue("fitB", false);
+			cfg_fitS = await GM.getValue("fitS", true);
+			cfg_js = await GM.getValue("js", "");
+		makeimage();
 	}
-	makeimage();
-}
-loadCfg();
+	loadCfg();
 
-function $(id) {return document.getElementById(id);}
+	function $(id) {return document.getElementById(id);}
 
-function cfg()
-{
-	if (typeof GM.setValue !== "undefined")
+	cfg = function ()
 	{
 		function saveCfg()
 		{
@@ -366,8 +380,13 @@ function cfg()
 		$("ci_cfg_6_js").value = cfg_js;
 		$("ci_cfg_save").addEventListener("click", saveCfg, true);
 	}
-	else
+}
+else
+{
+	cfg_js = "";
+	cfg = function ()
 	{
-		alert("Sorry, Chrome userscripts in native mode can't have configurations! Install TamperMonkey (Beta) extension. (it's very good)");
+		alert("Sorry, Chrome userscripts in native mode can't have configurations! You need to install TamperMonkey userscript manager extension. (it's very good)");
 	}
+	
 }
