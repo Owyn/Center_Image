@@ -2,7 +2,7 @@
 // @name          Center Image
 // @namespace     CenterImage
 // @author        Owyn
-// @version       1.96
+// @version       1.97
 // @description   Improved controls for images directly opened with your browser - hotkeys & resizing & visuals
 // @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
@@ -44,7 +44,7 @@ function makeimage()
 		document.body.bgColor = cfg_bgclr;
 		if(document.head){document.head.innerHTML = "";} // remove FireFox background
 	}
-	document.body.innerHTML = "<style id=img_style>img { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: "+cfg_bgclr+"}</style>"; // center image & change loading image color from white in Chrome
+	document.body.innerHTML = "<style id=img_style>img { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: "+cfg_bgclr+" !important}</style>"; // center image & change loading image color from white in Chrome
 	theStyle = document.body.querySelector("#img_style");
 	i.style = ""; // chrome has lots of crap there
 	document.body.style = "";
