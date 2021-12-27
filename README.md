@@ -12,6 +12,5 @@ Improves controls for images directly opened with your browser - with hotkeys & 
 </ul>
 
 <h3>Supported browsers:</h3>
-<img src=https://upload.wikimedia.org/wikipedia/en/thumb/d/d0/Chrome_Logo.svg/90px-Chrome_Logo.svg.png>
-<img src=https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Mozilla_Firefox_3.5_logo_256.png/90px-Mozilla_Firefox_3.5_logo_256.png>
+<img src=https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Chrome_icon_%28September_2014%29.svg/180px-Google_Chrome_icon_%28September_2014%29.svg.png><img src=https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Mozilla_Firefox_3.5_logo_256.png/180px-Mozilla_Firefox_3.5_logo_256.png>
 
