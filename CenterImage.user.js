@@ -2,7 +2,7 @@
 // @name          Center Image
 // @namespace     CenterImage
 // @author        Owyn
-// @version       1.95
+// @version       1.96
 // @description   Improved controls for images directly opened with your browser - hotkeys & resizing & visuals
 // @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
@@ -288,12 +288,15 @@ function autoresize()
 	link.rel = 'shortcut icon';
 	link.href = i.src;
 	document.head.appendChild(link);*/ // favicon
-	/*var title = i.src.substr(i.src.lastIndexOf("/")+1);
-	if(title.indexOf("?") != -1)
+	if(FireFox) // chrome already does ~this
 	{
-		title = title.substr(0, title.indexOf("?"));
+		var title = i.src.substr(i.src.lastIndexOf("/")+1);
+		if(title.indexOf("?") != -1)
+		{
+			title = title.substr(0, title.indexOf("?"));
+		}
+		document.title = title + " (" + i.naturalWidth + "x" + i.naturalHeight + ")"; // title
 	}
-	document.title = title + " (" + i.naturalWidth + "x" + i.naturalHeight + ")";*/ // title
 	
 	orgImgWidth = Math.round(i.naturalWidth / window.devicePixelRatio);
 	orgImgHeight = Math.round(i.naturalHeight / window.devicePixelRatio);
