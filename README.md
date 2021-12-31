@@ -1,5 +1,5 @@
 <h3>Summary</h3>
-Improves controls for images directly opened with your browser - with hotkeys & auto-resizing & custom visuals. You can configure background color of the page and of the loading image (so it won't be pure white anymore (Chrome only atm)) & which images to fit (or fill) to window and which to leave in original size when opened.
+Improves controls for images directly opened with your browser - with hotkeys & auto-resizing & custom visuals. You can configure background color of the page and of the loading image (so it won't be pure white anymore) & which images to fit (or fill) to window and which to leave in original size when opened.
 <br>* A brother of <a href=https://github.com/Owyn/HandyImage>Handy Just Image</a> but for all images you open in your browser (directly - e.g. with "open image" after right-clicking on an image)
 
 <h3>Hotkeys</h3>
