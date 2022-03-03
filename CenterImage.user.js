@@ -2,7 +2,7 @@
 // @name          Center Image
 // @namespace     CenterImage
 // @author        Owyn
-// @version       1.97
+// @version       1.98
 // @description   Improved controls for images directly opened with your browser - hotkeys & resizing & visuals
 // @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
@@ -21,7 +21,7 @@
 "use strict";
 
 var images = document.images;
-if (!images || images.length !== 1 || images[0].src !== location.href) 
+if (!images || images.length !== 1 || images[0].src !== location.href  || document.images[0].getAttribute("src") === "") 
 {
 	return false;
 }
