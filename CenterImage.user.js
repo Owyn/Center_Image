@@ -21,7 +21,7 @@
 "use strict";
 
 var images = document.images;
-if (!images || images.length !== 1 || images[0].src !== location.href  || document.images[0].getAttribute("src") === "") 
+if (!images || images.length !== 1 || images[0].src !== location.href || images[0].getAttribute("src") === "") 
 {
 	return false;
 }
