@@ -2,7 +2,7 @@
 // @name          Center Image
 // @namespace     CenterImage
 // @author        Owyn
-// @version       1.98
+// @version       1.99
 // @description   Improved controls for images directly opened with your browser - hotkeys & resizing & visuals
 // @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
