@@ -277,8 +277,22 @@ function rescale(event, fill)
 var orgImgWidth;
 var orgImgHeight;
 
+var ARC = 0;
 function autoresize()
 {
+	if(!i.naturalHeight) // it was always working before but not anymore
+	{
+		ARC++;
+		if(ARC < 500)
+		{
+			unsafeWindow.setTimeout(autoresize, 10);
+		}
+		else
+		{
+			console.warn("Center Image: Gave up waiting for a working image, it is broken");
+		}
+		return;
+	}
 	if(!document.head) // old fix for old chrome - let it be
 	{
 		document.lastChild.insertBefore(document.createElement("head"), document.body);
