@@ -2,7 +2,7 @@
 // @name          Center Image
 // @namespace     CenterImage
 // @author        Owyn
-// @version       1.99
+// @version       2.00
 // @description   Improved controls for images directly opened with your browser - hotkeys & resizing & visuals
 // @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
@@ -99,7 +99,7 @@ function changeCursor()
 	//i.style.margin = "auto";
 	if(rescaled === 0) // original
 	{
-		if(orgImgWidth == window.innerWidth || orgImgHeight == window.innerHeight) // perfect fit, can't resize
+		if((orgImgWidth == window.innerWidth && orgImgHeight <= window.innerHeight) || (orgImgWidth <= window.innerWidth && orgImgHeight == window.innerHeight)) // perfect fit on one side, can't resize
 		{
 			i.style.cursor = "";
 		}
@@ -129,7 +129,7 @@ function changeCursor()
 	}
 	else // if(rescaled === 1) // fit
 	{
-		if(orgImgWidth == window.innerWidth || orgImgHeight == window.innerHeight) // perfect fit, can't resize
+		if((orgImgWidth == window.innerWidth && orgImgHeight <= window.innerHeight) || (orgImgWidth <= window.innerWidth && orgImgHeight == window.innerHeight)) // perfect fit on one side, can't resize
 		{
 			i.style.cursor = "";
 		}
