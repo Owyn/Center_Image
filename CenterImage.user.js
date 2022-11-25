@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name          Center Image
+// @name          Center Image & Video
 // @namespace     CenterImage
 // @author        Owyn
-// @version       2.00
-// @description   Improved controls for images directly opened with your browser - hotkeys & resizing & visuals
+// @version       2.1
+// @description   Improved controls for images & videos opened directly with your browser - hotkeys & resizing & visuals
 // @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @supportURL    https://github.com/Owyn/Center_Image/issues
@@ -12,7 +12,9 @@
 // @noframes
 // @grant         GM.getValue
 // @grant         GM.setValue
+// @grant         GM_addElement
 // @grant         GM_registerMenuCommand
+// @sandbox       JavaScript
 // @match         http://*/*
 // @match         https://*/*
 // @match         file:///*/*
@@ -20,8 +22,19 @@
 
 "use strict";
 
-var images = document.images;
-if (!images || images.length !== 1 || images[0].src !== location.href || images[0].getAttribute("src") === "") 
+let type = document.contentType.substring(0,document.contentType.indexOf("/"));
+let i, is_video;
+if (type === "image")
+{
+	is_video = false;
+	i = document.images[0];
+}
+else if(type === "video") 
+{
+	is_video = true;
+	i = document.querySelector("video");
+}
+else
 {
 	return false;
 }
@@ -31,28 +44,34 @@ if (typeof GM_registerMenuCommand !== "undefined")
 	GM_registerMenuCommand("Center Image Configuration", cfg, "n");
 }
 
-var rescaled = 0;
-var iot = 0, iol = 0;
-var i = images[0];
+let rescaled = 0;
+let iot = 0, iol = 0;
+let skip_by = 5;
 
-var theStyle;
+//let theStyle;
+let title;
 function makeimage()
 {
 	if(typeof cfg_js !== "string") {setTimeout(function() { makeimage(); }, 11); return false;} // lets wait for async
+	title = document.title;
 	if(cfg_bgclr)
 	{
-		document.body.bgColor = cfg_bgclr;
 		if(document.head){document.head.innerHTML = "";} // remove FireFox background
 	}
-	document.body.innerHTML = "<style id=img_style>img { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: "+cfg_bgclr+" !important}</style>"; // center image & change loading image color from white in Chrome
-	theStyle = document.body.querySelector("#img_style");
-	i.style = ""; // chrome has lots of crap there
-	document.body.style = "";
-	theStyle.sheet.rules[0].style.margin = "auto"; // center image
-	document.body.style.margin = "0px";
-	document.body.appendChild(i);
-	i.addEventListener("mousedown", onmousedown, true);
-	i.addEventListener("click", rescale, true);
+	i.removeAttribute('class');
+	document.body.removeAttribute('style');
+	if(!is_video)
+	{
+		i.addEventListener("click", rescale, true);
+		i.addEventListener("mousedown", onmousedown, true);
+	}
+	else
+	{
+		i.volume = cfg_vol;
+		i.addEventListener("volumechange", onvolumechange, true);
+		i.controls = true;
+		i.loop = true;
+	}
 	i.addEventListener("auxclick", rescale, true);
 	window.addEventListener("keydown", onkeydown, true);
 	window.addEventListener("scroll", onscroll, false);
@@ -60,18 +79,21 @@ function makeimage()
 	onVisibilityChange();
 }
 
+function onvolumechange()
+{
+	GM.setValue("vid_volume", (i.muted? "0" : i.volume));
+}
+
 function onVisibilityChange()
 {
 	if (document.visibilityState === 'visible')
 	{
-		if(i)
-		{
-			autoresize();
-			document.removeEventListener('visibilitychange', onVisibilityChange);
-		}
+		//console.log('visible');
+		window.removeEventListener('visibilitychange', onVisibilityChange);
+		autoresize();
 	}
 }
-document.addEventListener("visibilitychange", onVisibilityChange);
+window.addEventListener("visibilitychange", onVisibilityChange);
 
 var scrolledY, scrolledX;
 function onscroll()
@@ -96,6 +118,19 @@ function onresize() // doesn't let image change back to "fit to window" in chrom
 
 function changeCursor()
 {
+	if(i.scrollHeight > window.innerHeight) // image pushing out-of-screen at top fix
+	{
+		i.classList.add("center_H");
+		//theStyle.sheet.rules[0].style.margin = "0px auto";
+	}
+	else
+	{
+		i.classList.add("center");
+		//theStyle.sheet.rules[0].style.margin = "auto";
+	}
+	//i.style.margin = ""; // chrome pls stop
+	if(is_video) return;
+
 	//i.style.margin = "auto";
 	if(rescaled === 0) // original
 	{
@@ -142,16 +177,6 @@ function changeCursor()
 			i.style.cursor = "zoom-out";
 		}
 	}
-
-	if(i.height > window.innerHeight) // image pushing out-of-screen browser bug fix
-	{
-		theStyle.sheet.rules[0].style.margin = "0px auto";
-	}
-	else
-	{
-		theStyle.sheet.rules[0].style.margin = "auto";
-	}
-	i.style.margin = ""; // chrome pls stop
 }
 
 function onmousedown()
@@ -196,8 +221,9 @@ function rescale(event, fill)
 		event.stopPropagation();
 	}
 
-	document.body.style.overflowX = '';
-	document.body.style.overflowY = '';
+	//document.body.style.overflowX = '';
+	//document.body.style.overflowY = '';
+	document.body.removeAttribute('style');
 
 	let scrollMax_Y = window.scrollMaxY || ((document.body.scrollHeight || document.documentElement.scrollHeight)- document.documentElement.clientHeight);
 	let scrollMax_X = window.scrollMaxX || ((document.body.scrollWidth || document.documentElement.scrollWidth)- document.documentElement.clientWidth);
@@ -208,13 +234,15 @@ function rescale(event, fill)
 	let unFilling = false;
 
 	let sidesCMP;
+	i.removeAttribute('class'); // clear classes
 	if(fill)
 	{
 		if(rescaled === 2) // to original
 		{
 			rescaled = 0;
-			theStyle.sheet.rules[0].style.width = orgImgWidth + "px";
-			theStyle.sheet.rules[0].style.height = orgImgHeight + "px";
+			i.classList.add("org");
+			//theStyle.sheet.rules[0].style.width = orgImgWidth + "px";
+			//theStyle.sheet.rules[0].style.height = orgImgHeight + "px";
 		}
 		else // fill
 		{
@@ -228,8 +256,9 @@ function rescale(event, fill)
 		{
 			if(rescaled === 2) {unFilling = true;}
 			rescaled = 0;
-			theStyle.sheet.rules[0].style.width = orgImgWidth + "px";
-			theStyle.sheet.rules[0].style.height = orgImgHeight + "px";
+			i.classList.add("org");
+			//theStyle.sheet.rules[0].style.width = orgImgWidth + "px";
+			//theStyle.sheet.rules[0].style.height = orgImgHeight + "px";
 		}
 		else // fit
 		{
@@ -242,14 +271,16 @@ function rescale(event, fill)
 	{
 		if(sidesCMP)
 		{
-			theStyle.sheet.rules[0].style.width = "100%";
-			theStyle.sheet.rules[0].style.height = "auto";
+			i.classList.add("fill_H");
+			//theStyle.sheet.rules[0].style.width = "100%";
+			//theStyle.sheet.rules[0].style.height = "auto";
 			document.body.style.overflowX = 'hidden'; // we don't need unscrollable scrollbars if they appear
 		}
 		else
 		{
-			theStyle.sheet.rules[0].style.height = "100%";
-			theStyle.sheet.rules[0].style.width = "auto";
+			i.classList.add("fill_V");
+			//theStyle.sheet.rules[0].style.height = "100%";
+			//theStyle.sheet.rules[0].style.width = "auto";
 			document.body.style.overflowY = 'hidden'; // we don't need unscrollable scrollbars if they appear
 		}
 	}
@@ -280,12 +311,12 @@ var orgImgHeight;
 var ARC = 0;
 function autoresize()
 {
-	if(!i.naturalHeight) // it was always working before but not anymore
+	if(!((!is_video && i.naturalHeight) || i.videoHeight))
 	{
 		ARC++;
 		if(ARC < 500)
 		{
-			unsafeWindow.setTimeout(autoresize, 10);
+			setTimeout(autoresize, 10);
 		}
 		else
 		{
@@ -293,45 +324,44 @@ function autoresize()
 		}
 		return;
 	}
-	if(!document.head) // old fix for old chrome - let it be
+	if(is_video) // chrome & FF don't show video resolution, + chrome doesn't show video name
 	{
-		document.lastChild.insertBefore(document.createElement("head"), document.body);
-	}
-	/*var link = document.createElement('link');
-	link.type = 'image/x-icon';
-	link.rel = 'shortcut icon';
-	link.href = i.src;
-	document.head.appendChild(link);*/ // favicon
-	if(FireFox) // chrome already does ~this
-	{
-		var title = i.src.substr(i.src.lastIndexOf("/")+1);
-		if(title.indexOf("?") != -1)
+		if(!FireFox)
 		{
-			title = title.substr(0, title.indexOf("?"));
+			title = i.src.substr(i.src.lastIndexOf("/")+1);
+			if(title.indexOf("?") != -1)
+			{
+				title = title.substr(0, title.indexOf("?"));
+			}
 		}
-		document.title = title + " (" + i.naturalWidth + "x" + i.naturalHeight + ")"; // title
+		title = title + " (" + i.videoWidth + "x" + i.videoHeight + ")";
+		//title = title + " (" + i.naturalWidth + "x" + i.naturalHeight + ")"; // for images
+		//title = decodeURIComponent(title); // browser already decoded it
 	}
-	
-	orgImgWidth = Math.round(i.naturalWidth / window.devicePixelRatio);
-	orgImgHeight = Math.round(i.naturalHeight / window.devicePixelRatio);
+	else if(FireFox)
+	{
+		let f = title.indexOf(" — Scaled (");
+		if(f !== -1)
+		{
+			title = title.substring(0,f);
+		}
+	}
+	document.title = title;
+	orgImgWidth = Math.round((is_video ? i.videoWidth : i.naturalWidth) / window.devicePixelRatio);
+	orgImgHeight = Math.round((is_video ? i.videoHeight : i.naturalHeight) / window.devicePixelRatio);
 
 	let InitRescale = false; // directly opened image is already fit to window if it is bigger by the browser
 	if(cfg_fitWH && orgImgHeight > window.innerHeight && orgImgWidth > window.innerWidth) // both scrollbars
 	{
-		InitRescale = false;
+		InitRescale = true;
 	}
 	else if(cfg_fitB && (orgImgHeight > window.innerHeight || orgImgWidth > window.innerWidth)) // one scrollbar
 	{
-		InitRescale = false;
+		InitRescale = true;
 	}
 	else if(cfg_fitS && orgImgHeight <= window.innerHeight && orgImgWidth <= window.innerWidth) // no scrollbars
 	{
 		InitRescale = true;
-	}
-	else
-	{
-		theStyle.sheet.rules[0].style.width = orgImgWidth + "px";
-		theStyle.sheet.rules[0].style.height = orgImgHeight + "px";
 	}
 	if(InitRescale)
 	{
@@ -339,7 +369,25 @@ function autoresize()
 	}
 	else
 	{
+		i.classList.add("org");
 		changeCursor();
+	}
+	let css = (is_video? "video" : "img") +`{position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: `+cfg_bgclr+` !important; outline: none;}
+			body {margin: 0px !important; background-color: `+cfg_bgclr+` !important;}
+			.center {margin: auto !important;}
+			.center_H {margin: 0px auto !important;}
+			.fill_H {width: 100% !important; height: auto !important;}
+			.fill_V {width: auto !important; height: 100% !important;}
+			.org {width: `+ orgImgWidth + `px !important; height: `+ orgImgHeight + `px !important; }`;
+	if(FireFox)
+	{
+		let theStyle = document.createElement('style');
+		theStyle.appendChild(document.createTextNode(css));
+		document.documentElement.appendChild(theStyle);
+	}
+	else
+	{
+		GM_addElement(document.documentElement, 'style', {textContent: css});
 	}
 	if(cfg_js){eval(cfg_js);}
 }
@@ -416,13 +464,27 @@ function onkeydown (b)
 	case KeyEvent.DOM_VK_RIGHT:
 	case KeyEvent.DOM_VK_D:
 	case KeyEvent.DOM_VK_NUMPAD6:
-		window.scrollBy(by, 0);
+		if(!is_video)
+		{
+			window.scrollBy(by, 0);
+		}
+		else
+		{
+			i.currentTime += skip_by;
+		}
 		cancelEvent(b);
 		break;
 	case KeyEvent.DOM_VK_LEFT:
 	case KeyEvent.DOM_VK_A:
 	case KeyEvent.DOM_VK_NUMPAD4:
-		window.scrollBy(by * -1, 0);
+		if(!is_video)
+		{
+			window.scrollBy(by * -1, 0);
+		}
+		else
+		{
+			i.currentTime -= skip_by;
+		}
 		cancelEvent(b);
 		break;
 	case KeyEvent.DOM_VK_W:
@@ -436,7 +498,18 @@ function onkeydown (b)
 		cancelEvent(b);
 		break;
 	case KeyEvent.DOM_VK_SPACE:
-		scroll_space(b.shiftKey, b.ctrlKey);
+		if(!is_video)
+		{
+			scroll_space(b.shiftKey, b.ctrlKey);
+		}
+		else if(i.paused || i.ended)
+		{
+			i.play();
+		}
+		else
+		{
+			i.pause();
+		}
 		cancelEvent(b);
 		break;
 	case KeyEvent.DOM_VK_TAB:
@@ -461,20 +534,20 @@ var cfg_fitB = false;
 var cfg_fitS = true;
 var cfg_fill = false;
 var cfg_js;
+var cfg_vol = "0.5";
 
 function cfg(){}
-
 if (typeof GM !== "undefined" && typeof GM.getValue !== "undefined")
 {
 	async function loadCfg()
 	{
-			cfg_bgclr = await GM.getValue("bgColor", "grey");
-			cfg_fitWH = await GM.getValue("fitWH", true);
-			cfg_fitB = await GM.getValue("fitB", false);
-			cfg_fitS = await GM.getValue("fitS", true);
-			cfg_fill = await GM.getValue("fill", false);
-			cfg_js = await GM.getValue("js", "");
-		makeimage();
+		cfg_bgclr = await GM.getValue("bgColor", "grey");
+		cfg_fitWH = await GM.getValue("fitWH", true);
+		cfg_fitB = await GM.getValue("fitB", false);
+		cfg_fitS = await GM.getValue("fitS", true);
+		cfg_fill = await GM.getValue("fill", false);
+		cfg_js = await GM.getValue("js", "");
+		cfg_vol = await GM.getValue("vid_volume", "0.5");
 	}
 	loadCfg();
 
@@ -502,11 +575,7 @@ if (typeof GM !== "undefined" && typeof GM.getValue !== "undefined")
 		if(document.head){document.head.innerHTML = "";}
 		document.body.innerHTML = "";
 		var div = document.createElement("div");
-		div.style.margin = "11% auto";
-		div.style.width = "444px";
-		div.style.border = "solid 1px black";
-		div.style.color = "black";
-		div.style.background = "silver";
+		div.style = "margin: auto; width: fit-content; height: fit-content; border: 1px solid black; color: black; background: silver; position: absolute; top: 0; right: 0; bottom: 0; left: 0;";
 		div.innerHTML = "<b><center>Configuration</center></b>"
 		+ "<br><input id='ci_cfg_2_bgclr' type='text' size='6'> Background color (empty = default)"
 		+ "<br><br>Fit to window images:" + " ( Fill to window instead <input id='ci_cfg_7_fill' type='checkbox'> )"
@@ -532,5 +601,5 @@ else
 	{
 		alert("Sorry, Chrome userscripts in native mode can't have configurations! You need to install TamperMonkey userscript manager extension. (it's very good)");
 	}
-	
 }
+makeimage();
