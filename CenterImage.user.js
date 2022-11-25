@@ -2,7 +2,7 @@
 // @name          Center Image & Video
 // @namespace     CenterImage
 // @author        Owyn
-// @version       2.1
+// @version       2.11
 // @description   Improved controls for images & videos opened directly with your browser - hotkeys & resizing & visuals
 // @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
@@ -350,6 +350,24 @@ function autoresize()
 	orgImgWidth = Math.round((is_video ? i.videoWidth : i.naturalWidth) / window.devicePixelRatio);
 	orgImgHeight = Math.round((is_video ? i.videoHeight : i.naturalHeight) / window.devicePixelRatio);
 
+	let css = (is_video? "video" : "img") +`{position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: `+cfg_bgclr+` !important; outline: none;}
+			body {margin: 0px !important; background-color: `+cfg_bgclr+` !important;}
+			.center {margin: auto !important;}
+			.center_H {margin: 0px auto !important;}
+			.fill_H {width: 100% !important; height: auto !important;}
+			.fill_V {width: auto !important; height: 100% !important;}
+			.org {width: `+ orgImgWidth + `px !important; height: `+ orgImgHeight + `px !important; }`;
+	if(FireFox)
+	{
+		let theStyle = document.createElement('style');
+		theStyle.appendChild(document.createTextNode(css));
+		document.documentElement.appendChild(theStyle);
+	}
+	else
+	{
+		GM_addElement(document.documentElement, 'style', {textContent: css});
+	}
+
 	let InitRescale = false; // directly opened image is already fit to window if it is bigger by the browser
 	if(cfg_fitWH && orgImgHeight > window.innerHeight && orgImgWidth > window.innerWidth) // both scrollbars
 	{
@@ -372,23 +390,7 @@ function autoresize()
 		i.classList.add("org");
 		changeCursor();
 	}
-	let css = (is_video? "video" : "img") +`{position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: `+cfg_bgclr+` !important; outline: none;}
-			body {margin: 0px !important; background-color: `+cfg_bgclr+` !important;}
-			.center {margin: auto !important;}
-			.center_H {margin: 0px auto !important;}
-			.fill_H {width: 100% !important; height: auto !important;}
-			.fill_V {width: auto !important; height: 100% !important;}
-			.org {width: `+ orgImgWidth + `px !important; height: `+ orgImgHeight + `px !important; }`;
-	if(FireFox)
-	{
-		let theStyle = document.createElement('style');
-		theStyle.appendChild(document.createTextNode(css));
-		document.documentElement.appendChild(theStyle);
-	}
-	else
-	{
-		GM_addElement(document.documentElement, 'style', {textContent: css});
-	}
+
 	if(cfg_js){eval(cfg_js);}
 }
 
