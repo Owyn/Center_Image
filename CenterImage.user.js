@@ -2,7 +2,7 @@
 // @name          Center Image & Video
 // @namespace     CenterImage
 // @author        Owyn
-// @version       2.11
+// @version       2.12
 // @description   Improved controls for images & videos opened directly with your browser - hotkeys & resizing & visuals
 // @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
@@ -59,6 +59,7 @@ function makeimage()
 		if(document.head){document.head.innerHTML = "";} // remove FireFox background
 	}
 	i.removeAttribute('class');
+	i.removeAttribute('style'); // chrome
 	document.body.removeAttribute('style');
 	if(!is_video)
 	{
@@ -128,7 +129,6 @@ function changeCursor()
 		i.classList.add("center");
 		//theStyle.sheet.rules[0].style.margin = "auto";
 	}
-	//i.style.margin = ""; // chrome pls stop
 	if(is_video) return;
 
 	//i.style.margin = "auto";
@@ -350,7 +350,7 @@ function autoresize()
 	orgImgWidth = Math.round((is_video ? i.videoWidth : i.naturalWidth) / window.devicePixelRatio);
 	orgImgHeight = Math.round((is_video ? i.videoHeight : i.naturalHeight) / window.devicePixelRatio);
 
-	let css = (is_video? "video" : "img") +`{position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: `+cfg_bgclr+` !important; outline: none;}
+	let css = (is_video? "video" : "img") +`{position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: `+cfg_bgclr+` !important; outline: none; max-width: unset; max-height: unset;}
 			body {margin: 0px !important; background-color: `+cfg_bgclr+` !important;}
 			.center {margin: auto !important;}
 			.center_H {margin: 0px auto !important;}
