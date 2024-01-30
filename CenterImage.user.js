@@ -2,7 +2,7 @@
 // @name          Center Image & Video
 // @namespace     CenterImage
 // @author        Owyn
-// @version       2.12
+// @version       2024.01.30
 // @description   Improved controls for images & videos opened directly with your browser - hotkeys & resizing & visuals
 // @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
@@ -42,6 +42,16 @@ else
 if (typeof GM_registerMenuCommand !== "undefined")
 {
 	GM_registerMenuCommand("Center Image Configuration", cfg, "n");
+}
+
+if (typeof GM_addElement === "undefined")
+{
+	function GM_addElement(node, type, content)
+	{
+		let el = document.createElement(type);
+		el.textContent = content.textContent;
+		node.appendChild(el);
+	}
 }
 
 let rescaled = 0;
@@ -357,16 +367,7 @@ function autoresize()
 			.fill_H {width: 100% !important; height: auto !important;}
 			.fill_V {width: auto !important; height: 100% !important;}
 			.org {width: `+ orgImgWidth + `px !important; height: `+ orgImgHeight + `px !important; }`;
-	if(FireFox)
-	{
-		let theStyle = document.createElement('style');
-		theStyle.appendChild(document.createTextNode(css));
-		document.documentElement.appendChild(theStyle);
-	}
-	else
-	{
-		GM_addElement(document.documentElement, 'style', {textContent: css});
-	}
+	GM_addElement(document.documentElement, 'style', {textContent: css});
 
 	let InitRescale = false; // directly opened image is already fit to window if it is bigger by the browser
 	if(cfg_fitWH && orgImgHeight > window.innerHeight && orgImgWidth > window.innerWidth) // both scrollbars
