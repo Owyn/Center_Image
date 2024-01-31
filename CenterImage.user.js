@@ -2,7 +2,7 @@
 // @name          Center Image & Video
 // @namespace     CenterImage
 // @author        Owyn
-// @version       2024.01.30
+// @version       2024.01.31
 // @description   Improved controls for images & videos opened directly with your browser - hotkeys & resizing & visuals
 // @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
@@ -46,7 +46,7 @@ if (typeof GM_registerMenuCommand !== "undefined")
 
 if (typeof GM_addElement === "undefined")
 {
-	function GM_addElement(node, type, content)
+	window.GM_addElement = function GM_addElement(node, type, content)
 	{
 		let el = document.createElement(type);
 		el.textContent = content.textContent;
@@ -189,7 +189,7 @@ function changeCursor()
 	}
 }
 
-function onmousedown()
+function onmousedown(event)
 {
 	if(i.offsetLeft > 0){iol = i.offsetLeft;}
 	if(i.offsetTop > 0){iot = i.offsetTop;}
