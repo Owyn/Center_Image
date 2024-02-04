@@ -2,7 +2,7 @@
 // @name          Center Image & Video
 // @namespace     CenterImage
 // @author        Owyn
-// @version       2024.01.31
+// @version       2024.02.01
 // @description   Improved controls for images & videos opened directly with your browser - hotkeys & resizing & visuals
 // @updateURL     https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
 // @downloadURL   https://github.com/Owyn/Center_Image/raw/master/CenterImage.user.js
@@ -44,15 +44,12 @@ if (typeof GM_registerMenuCommand !== "undefined")
 	GM_registerMenuCommand("Center Image Configuration", cfg, "n");
 }
 
-if (typeof GM_addElement === "undefined")
+const AddElementToPage = typeof GM_addElement === "function" ? GM_addElement : function GM_addElement(node, type, content)
 {
-	window.GM_addElement = function GM_addElement(node, type, content)
-	{
-		let el = document.createElement(type);
-		el.textContent = content.textContent;
-		node.appendChild(el);
-	}
-}
+	let el = document.createElement(type);
+	el.textContent = content.textContent;
+	node.appendChild(el);
+};
 
 let rescaled = 0;
 let iot = 0, iol = 0;
@@ -367,7 +364,7 @@ function autoresize()
 			.fill_H {width: 100% !important; height: auto !important;}
 			.fill_V {width: auto !important; height: 100% !important;}
 			.org {width: `+ orgImgWidth + `px !important; height: `+ orgImgHeight + `px !important; }`;
-	GM_addElement(document.documentElement, 'style', {textContent: css});
+	AddElementToPage(document.documentElement, 'style', {textContent: css});
 
 	let InitRescale = false; // directly opened image is already fit to window if it is bigger by the browser
 	if(cfg_fitWH && orgImgHeight > window.innerHeight && orgImgWidth > window.innerWidth) // both scrollbars
